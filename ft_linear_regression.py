@@ -6,7 +6,7 @@ import math
 def getTetha():
     try:
         tethas = open("tethas.txt", "r")
-        values = tethas.read().rstrip().strip()
+        values = tethas.read().strip()
         tethas.close()
         splitted = values.split(" ")
         if len(splitted) != 4:
@@ -29,12 +29,12 @@ def main(ac, av):
     if ac != 2:
         sys.exit("usage: python3 ft_linear_regression `kilometrage`")
     try:
-        kilometrage = int(av[1])
+        kilometrage = float(av[1])
     except Exception as e:
         sys.exit("Couldn't read a number from argument given")
     tetha0, tetha1,kmscale, pricescale = getTetha()
-    value = prixEstime(kilometrage, tetha0, tetha1)
-    print(value)
+    value = prixEstime(kilometrage / kmscale, tetha0, tetha1)
+    print(value * pricescale)
 
 
 if __name__ == "__main__":
