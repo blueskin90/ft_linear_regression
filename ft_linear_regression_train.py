@@ -6,7 +6,7 @@
 #    By: toliver <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/08/23 17:29:00 by toliver           #+#    #+#              #
-#    Updated: 2021/08/23 17:32:38 by toliver          ###   ########.fr        #
+#    Updated: 2021/08/31 18:17:40 by toliver          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -66,7 +66,10 @@ class Regression:
 
 
     def calculateTetha(self, data):
-        for i in range(1000000):
+        oldtmp0 = 1
+        oldtmp1 = 1
+        loopnbr = 0
+        while 1:
             tmp0 = 0
             tmp1 = 0
             for index, dat in enumerate(data):
@@ -79,8 +82,20 @@ class Regression:
 
             tmp0 = tmp0 * 0.0001
             tmp1 = tmp1 * 0.0001
+
+            if tmp0 == oldtmp0 and tmp1 == oldtmp1:
+                print("found the tetha !")
+                break
+
+            oldtmp0 = tmp0
+            oldtmp1 = tmp1
+
             self.tetha0 = self.tetha0 - tmp0
             self.tetha1 = self.tetha1 - tmp1
+
+            loopnbr += 1
+            if loopnbr % 1000 == 0:
+                print("iteration : ", loopnbr)
 
     def prixEstime(self, kilometrage):
         value = self.tetha0 + (self.tetha1 * kilometrage)
@@ -110,14 +125,20 @@ def parsing(path):
     except Exception as e:
         sys.exit("Couldn't read data file")
 
-def display(self, data):
+def display(data, reg):
     x = []
     y = []
 
     for dat in data:
-        y.append(dat.km)
-        x.append(dat.price)
+        x.append(dat.km)
+        y.append(dat.price)
     plt.scatter(x, y)
+
+
+    newy = []
+    for values in x:
+        newy.append(reg.prixEstime(values / reg.kmscale) * reg.pricescale)
+    plt.plot(x, newy, '-r')
     plt.xlabel('kilometres')
     plt.ylabel('prix')
     plt.title('price / km graph')
@@ -129,13 +150,10 @@ def main(ac, av):
     reg = Regression()
     data = parsing(av[1])
     reg.getScale(data)
-    #display(data)
-    data = reg.normalizeData(data)
-    reg.calculateTetha(data)
-
-    for dat in data:
-        print(dat)
+    normalizeddata = reg.normalizeData(data)
+    reg.calculateTetha(normalizeddata)
     reg.saveTetha()
+    display(data, reg)
 
 if __name__ == "__main__":
     main(len(sys.argv), sys.argv)
